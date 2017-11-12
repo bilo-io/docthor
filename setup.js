@@ -1,6 +1,6 @@
 var axios = require('axios');
 var colors = require('colors');
-var dir = './docs-github';
+var dir = './docs-hub';
 var fs = require('fs');
 var rimraf = require('rimraf')
 

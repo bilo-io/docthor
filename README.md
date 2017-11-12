@@ -20,8 +20,7 @@ Rename this file to \"README.md\".
 - `npm install`
 - `npm run dev`
 
-## Features
+## How it works
 
-> *Showcase*
-> - Provide a list of features 
-> - Ideally with screenshots
+
+
