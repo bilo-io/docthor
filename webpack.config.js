@@ -1,8 +1,14 @@
 var path = require('path');
 var webpack = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var marked = require('marked');
+var renderer = new marked.Renderer();  root: [
+    path.resolve('./client')
+  ]
 var DIST = path.resolve(__dirname, 'dist/');
 var SRC = path.resolve(__dirname, 'src/');
+var app = path.resolve(__dirname, 'src/app');
+var docs = path.resolve(__dirname, 'docs-hub');
 
 var config = {
     entry: SRC + '/index.js',
@@ -12,6 +18,13 @@ var config = {
         filename: 'app.js'
     },
     devtool: 'source-maps',
+    resolve: {
+        modules: [
+            path.resolve('./'),
+            path.resolve('./src/app'),
+            path.resolve('./node_modules')
+          ]
+    },
     module: {
         rules: [
             {

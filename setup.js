@@ -3,6 +3,7 @@ var colors = require('colors');
 var dir = './docs-hub';
 var fs = require('fs');
 var rimraf = require('rimraf')
+var dirTree = require('directory-tree')
 
 if (!fs.existsSync(dir)) {
   console.log(`[setup] `, `initialising ${dir}`.green)
@@ -14,8 +15,11 @@ if (!fs.existsSync(dir)) {
   
 }
 
+const log = (args) => {
+  console.log(`[setup] `, args)
+}
 const downloadDocs = (url) => {
-  console.log('[setup] ', `⇩ GET: ${url}`.blue)
+  log(`⇩ GET: ${url}`.blue)
   axios({
     method: 'GET',
     url,
@@ -23,15 +27,16 @@ const downloadDocs = (url) => {
       "Accept": "application/vnd.github.raw"
     }
   }).then((apiResponse) => {
-    console.log(`[setup] `, `✔ download complete`.green, `\n-> response length: ${apiResponse.data.length}`)
     const title = apiResponse.data.split('\n')[0].split('#')[1]
-    console.log(title)
+    log(`✔ download complete`.green,
+      `\n  -> response length: ${apiResponse.data.length}`,
+      `\n  -> response title:  ${title}`)
     fs.writeFile(`${dir}/${title}.md`, apiResponse.data, function (err) {
       if (err) {
         return console.log(err);
       }
-
-      console.log("The file was saved!");
+      log(`saved ${dir}/${title}.md`.blue);
+      generateDocTree();
     });
     // fs.writeFileSync(dir, apiResponse.data, function (err) {   if (err) {
     // return console.warn(`[setup] error writing file: ${err}`.red)   } else {
@@ -44,3 +49,20 @@ const downloadDocs = (url) => {
 downloadDocs('https://api.github.com/repos/bilo-io/bilo-ui/contents/README.md');
 downloadDocs('https://api.github.com/repos/bilo-io/bilo-bio/contents/README.md');
 downloadDocs('https://api.github.com/repos/bilo-io/tut-react/contents/README.md');
+downloadFromConfig = (config) => {
+  // console.log(config)
+}
+
+// downloadFromConfig(config);
+
+
+const generateDocTree = () => {
+  const tree = dirTree('./docs-hub');
+  console.log('docs directory:\n', tree)
+  fs.writeFile(`${dir}/docs-tree.json`, JSON.stringify(tree, true, 4), function (err) {
+    if (err) {
+      return console.log(err);
+    }
+    log(`created doctree: ${tree}`.blue);
+  });
+}

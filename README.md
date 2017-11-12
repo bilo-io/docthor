@@ -14,11 +14,17 @@ Rename this file to \"README.md\".
 |[Webpack](https://webpack.github.io)|a module bundler for javascript projects|
 
 ## Quickstart
-
+### download repo
 - `git clone https://github.com/bilo-io/docthor.git`
 - `cd ./docthor`
-- `npm install`
-- `npm run dev`
+
+### setup project
+Run these steps in order:
+|command||
+|:-|:-|
+| `npm install`|setup dependencies for react application & documentation setup|
+| `npm run setup` |downloads and arranges documentation according to `docs.config.js`|
+| `npm run dev`|runs webapp with webpack in [localhost:8080](http://localhost:8080)|
 
 ## How it works
 

@@ -1,9 +1,11 @@
 import React from 'react';
 import './style.scss';
 import {Search, MDReader, Icon} from 'bilo-ui';
-import config from './config';
 import FuzzySearch from 'fuzzy-search';
 import axios from 'axios';
+import config from 'docs.config';
+import doctree from './doctree';
+// const fs = require('fs');
 
 export default class Docs extends React.Component {
     constructor(props) {
