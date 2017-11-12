@@ -1,0 +1,41 @@
+@import '../../../app.scss';
+
+.menu {
+  @extend .panel-side;
+}
+
+.docs { 
+    @extend .panel-main;
+    height: 100%;
+    overflow: hidden;
+    overflow-y: auto;
+}
+.menu-padding {
+  position: relative;
+  padding: 1em;
+}
+
+.menu-group {
+  width: 100%;
+  font-size: 1.3em;
+  left: 1em;
+  // &:hover {
+  //   background: white;
+  //   color: $col-active;
+  // }
+}
+
+.menu-section {
+  width: 100%;
+  font-size: 0.8em;
+  left: 3em;
+  text-indent: 1em;
+  padding: {
+    top: 0.2em;
+    bottom: 0.2em;
+  }
+  &:hover {
+    background: white;
+    color: $col-active;
+  }
+}
