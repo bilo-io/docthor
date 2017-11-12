@@ -27,6 +27,17 @@ var config = {
             }, {
                 test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
                 loader: 'file-loader?name=assets/[name].[ext]'
+            }, {
+                test: /\.md$/,
+                use: [
+                    {
+                        loader: 'markdown-loader',
+                        options: {
+                            pedantic: true,
+                            renderer
+                        }
+                    }
+                ]
             }
         ]
     },
