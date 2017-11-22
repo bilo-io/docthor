@@ -1,62 +1,24 @@
-var axios = require('axios');
-var colors = require('colors');
-var dir = './docs-hub';
-var fs = require('fs');
-var rimraf = require('rimraf')
+var axios = require('axios')
+var colors = require('colors')
 var dirTree = require('directory-tree')
+var fs = require('fs-extra')
+var svn = require('svn-interface')
 
-if (!fs.existsSync(dir)) {
-  console.log(`[setup] `, `initialising ${dir}`.green)
-  fs.mkdirSync(dir);
-} else {
-  console.log(`[setup] `, `recreating ${dir}`.green)
-  // fs.rmdirSync(dir);
-  rimraf(dir, () => fs.mkdirSync(dir))
-
-}
+var docs = require('./docs.js')
+var dir = './docs-hub'
 
 const log = (args) => {
   console.log(`[setup] `.green, args)
 }
 
-const downloadDocs = (url) => {
-  log(`⇩ GET: ${url}`.blue)
-  axios({
-    method: 'GET',
-    url,
-    headers: {
-      "Accept": "application/vnd.github.raw"
-    }
-  }).then((apiResponse) => {
-    const title = apiResponse
-      .data
-      .split('\n')[0]
-      .split('#')[1]
-    log(`✔ download complete`.green, `\n  -> response length: ${apiResponse.data.length}`, `\n  -> response title:  ${title}`)
-    fs.writeFile(`${dir}/${title}.md`, apiResponse.data, function (err) {
-      if (err) {
-        return console.log(err);
-      }
-      log(`saved ${dir}/${title}.md`.blue);
-      generateDocTree();
-    });
-    // fs.writeFileSync(dir, apiResponse.data, function (err) {   if (err) { return
-    // console.warn(`[setup] error writing file: ${err}`.red)   } else {
-    // console.log(`[setup] `, `file was saved`.green)   } })
-  }).catch((e) => {
-    console.warn(`[setup] `, `✗ could not download ${url}`.red, `\nerror: ${e}`.red)
-  })
+const setup = () => {
+  if (fs.existsSync(dir)) {
+    log(`recreating ${dir}`.green)
+    fs.remove(dir, () => fs.mkdir(dir, () => setupDocs()))
+  } else {
+    fs.mkdir(dir, () => setupDocs())
+  }
 }
-
-// downloadDocs('https://api.github.com/repos/bilo-io/bilo-ui/contents/README.md');
-// downloadDocs('https://api.github.com/repos/bilo-io/bilo-bio/contents/README.md');
-// downloadDocs('https://api.github.com/repos/bilo-io/tut-react/contents/README.md');
-
-downloadFromConfig = (config) => {
-  // console.log(config)
-}
-
-// downloadFromConfig(config);
 
 const generateDocTree = () => {
   const tree = dirTree('./docs-hub');
@@ -69,11 +31,46 @@ const generateDocTree = () => {
   });
 }
 
-const downloadGitDirectory = (title, baseUrl, path) => { 
+const downloadGitDirectory = (title, baseUrl, path) => {
   let url = `${baseUrl}/trunk/${path}`
-  log(`⇩ Downloading:\n => docs: ${title}\n => path: ${url}`.cyan)
+  let folder = path.split('/')[0];
+  log(`⇩ downloading:
+  -> docs: ${title}
+  => path: ${url}`.cyan)
+  svn.export(url, {}, () => {
+    log(`✔ copied: ${url}`.green)
+    addToDocs(folder, title)
+  })
 }
 
+const addToDocs = (folder, title) => {
+  log(`deleting: ${title}`.yellow)
+  fs.remove(title, (err) => {
+    if (!err) {
+      log(`-> renaming: '${folder}' to '${title}'`.grey)
+      fs.rename(folder, title, (err) => {
+        if (!err) {
+          log(`-> copying: '${title}' to 'docs-hub'`.magenta)
+          fs.copy(title, `docs-hub/${title}`, () => {
+            fs.remove(title).then((val) => {
+              log(`✔ added ${title}`)
+              generateDocTree()
+            }).catch((err) => {
+            })
+          })
+        }
+      })
+    }
+  })
+}
 
-let biloCliUrl = 'https://github.com/bilo-io/bilo-cli'
-downloadGitDirectory('Bilo-CLI',biloCliUrl,'.docs')
+const setupDocs = () => {
+  log(`setup started ... `.green)
+  log(`downloading doc items: `.green + `${docs.config.children.length}`.yellow)
+  docs.config.children.forEach((doc) => {
+    downloadGitDirectory(doc.repo, `${docs.config.base_url}/${doc.repo}`, doc.docs)
+  })
+  log(`setup complete !`.green)
+}
+
+setup()
