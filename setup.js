@@ -12,12 +12,13 @@ if (!fs.existsSync(dir)) {
   console.log(`[setup] `, `recreating ${dir}`.green)
   // fs.rmdirSync(dir);
   rimraf(dir, () => fs.mkdirSync(dir))
-  
+
 }
 
 const log = (args) => {
-  console.log(`[setup] `, args)
+  console.log(`[setup] `.green, args)
 }
+
 const downloadDocs = (url) => {
   log(`⇩ GET: ${url}`.blue)
   axios({
@@ -27,10 +28,11 @@ const downloadDocs = (url) => {
       "Accept": "application/vnd.github.raw"
     }
   }).then((apiResponse) => {
-    const title = apiResponse.data.split('\n')[0].split('#')[1]
-    log(`✔ download complete`.green,
-      `\n  -> response length: ${apiResponse.data.length}`,
-      `\n  -> response title:  ${title}`)
+    const title = apiResponse
+      .data
+      .split('\n')[0]
+      .split('#')[1]
+    log(`✔ download complete`.green, `\n  -> response length: ${apiResponse.data.length}`, `\n  -> response title:  ${title}`)
     fs.writeFile(`${dir}/${title}.md`, apiResponse.data, function (err) {
       if (err) {
         return console.log(err);
@@ -38,23 +40,23 @@ const downloadDocs = (url) => {
       log(`saved ${dir}/${title}.md`.blue);
       generateDocTree();
     });
-    // fs.writeFileSync(dir, apiResponse.data, function (err) {   if (err) {
-    // return console.warn(`[setup] error writing file: ${err}`.red)   } else {
+    // fs.writeFileSync(dir, apiResponse.data, function (err) {   if (err) { return
+    // console.warn(`[setup] error writing file: ${err}`.red)   } else {
     // console.log(`[setup] `, `file was saved`.green)   } })
   }).catch((e) => {
     console.warn(`[setup] `, `✗ could not download ${url}`.red, `\nerror: ${e}`.red)
   })
 }
 
-downloadDocs('https://api.github.com/repos/bilo-io/bilo-ui/contents/README.md');
-downloadDocs('https://api.github.com/repos/bilo-io/bilo-bio/contents/README.md');
-downloadDocs('https://api.github.com/repos/bilo-io/tut-react/contents/README.md');
+// downloadDocs('https://api.github.com/repos/bilo-io/bilo-ui/contents/README.md');
+// downloadDocs('https://api.github.com/repos/bilo-io/bilo-bio/contents/README.md');
+// downloadDocs('https://api.github.com/repos/bilo-io/tut-react/contents/README.md');
+
 downloadFromConfig = (config) => {
   // console.log(config)
 }
 
 // downloadFromConfig(config);
-
 
 const generateDocTree = () => {
   const tree = dirTree('./docs-hub');
@@ -66,3 +68,12 @@ const generateDocTree = () => {
     log(`created doctree: ${tree}`.blue);
   });
 }
+
+const downloadGitDirectory = (title, baseUrl, path) => { 
+  let url = `${baseUrl}/trunk/${path}`
+  log(`⇩ Downloading:\n => docs: ${title}\n => path: ${url}`.cyan)
+}
+
+
+let biloCliUrl = 'https://github.com/bilo-io/bilo-cli'
+downloadGitDirectory('Bilo-CLI',biloCliUrl,'.docs')

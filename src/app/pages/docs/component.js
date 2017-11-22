@@ -5,6 +5,7 @@ import FuzzySearch from 'fuzzy-search';
 import axios from 'axios';
 import config from 'docs.config';
 import doctree from './doctree';
+import DocsNav from '../../components/DocsNav';
 // const fs = require('fs');
 
 export default class Docs extends React.Component {
@@ -25,6 +26,7 @@ export default class Docs extends React.Component {
     }
     initAllDocs() {
         let docTree = config;
+        console.log({docTree})
         docTree.forEach((group) => {
             group
                 .children
@@ -52,12 +54,13 @@ export default class Docs extends React.Component {
         console.log(`searching: '${q}'\n`, result);
         this.setState({filteredDocs: result})
     }
+
     selectDoc(doc) {
         console.log(doc);
         this.setState({activeDoc: doc}, () => console.log(this.state))
     }
     render() {
-        return (
+        return this.state ? (
             <div className='page'>
                 <div className='menu menu-padding'>
                     <Search
@@ -66,28 +69,15 @@ export default class Docs extends React.Component {
                         search={(tag, q) => this.searchDocs(tag, q)}
                     />
                     {/* <Icon name='search' /> */}
-                    {this.state && this
-                        .state
-                        .filteredDocs
-                        .map((group, group_index) => (
-                            <div key={group_index} className='menu-group'>
-                                {group.label}
-                                {(group.children || []).map((section, section_index) => (
-                                    <div
-                                        key={`${group_index} ${section_index}`}
-                                        onClick={() => this.selectDoc(section.link)}
-                                        className='menu-section'>
-                                        {section.label}
-                                    </div>
-                                ))}
-                            </div>
-                        ))
-}
+                    
+                    <DocsNav
+                        docSections={this.state.filteredDocs}
+                        selectDoc={(doc) => this.selectDoc(doc)}/>
                 </div>
                 <div className='docs'>
                     <MDReader url={this.state.activeDoc} showHeadings={false}/>
                 </div>
             </div>
-        )
+        ) : null
     }
 }
